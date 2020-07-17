@@ -57,7 +57,7 @@ namespace CustomMath {
                 float sinZ = 2 * (w * z + x * y);
                 float cosZ = 1 - 2 * (y * y + z * z);
                 float eulerZ = Mathf.Atan2(sinZ, cosZ) * Mathf.PI/ 180.0f;
-                return new Vec3(x, y, z);
+                return new Vec3(eulerX, eulerY, eulerZ);
             }
             set
             {
@@ -115,7 +115,6 @@ namespace CustomMath {
             q.y = axis.y * sinAngle;
             q.z = axis.z * sinAngle;
             q.w = cosAngle;
-
             return q;
         }
         // Resumen:
@@ -170,7 +169,7 @@ namespace CustomMath {
         //   z:
         public static Quats Euler(float x, float y, float z)
         {
-            return new Quats(x, y, z, 1);
+            return Euler(new Vec3(x,y,z));
         }
         // Resumen:
         //     Creates a rotation which rotates from fromDirection to toDirection.
@@ -205,12 +204,11 @@ namespace CustomMath {
             Quats inverse = new Quats();
             float rotationMag = Mathf.Sqrt((rotation.x * rotation.x) + (rotation.y * rotation.y) + (rotation.z * rotation.z) + (rotation.w * rotation.w));
             // convierte rotationMag a 1/rotationMag.
-            float divisorRotMag = 1f / rotationMag;
-            // conjugate * 
-            inverse.x = -rotation.x * divisorRotMag;
-            inverse.y = -rotation.y * divisorRotMag;
-            inverse.z = -rotation.z * divisorRotMag;
-            inverse.w = rotation.w * divisorRotMag;
+            float escalarRotMag = 1f / rotationMag;
+            inverse.x = -rotation.x * escalarRotMag;
+            inverse.y = -rotation.y * escalarRotMag;
+            inverse.z = -rotation.z * escalarRotMag;
+            inverse.w = rotation.w * escalarRotMag;
             return inverse;
         }
 
@@ -262,7 +260,6 @@ namespace CustomMath {
         //   t:
         public static Quats LerpUnclamped(Quats a, Quats b, float t)
         {
-            Mathf.Clamp(t, 0, 1);
             float time = t;
             float timeLeft = 1.0f - time;
             Quats qActual = new Quats();
@@ -380,8 +377,7 @@ namespace CustomMath {
         //   from:
         //   to:
         //   maxDegreesDelta:
-        public static Quats RotateTowards(Quats from, Quats to, float maxDegreesDelta)
-        {
+        public static Quats RotateTowards(Quats from, Quats to, float maxDegreesDelta){
             float angulo = Angle(from, to);
             if (angulo == 0f)
             {
@@ -397,8 +393,7 @@ namespace CustomMath {
         //   a:
         //   b:
         //   t:
-        public static Quats Slerp(Quats a, Quats b, float t)
-        {
+        public static Quats Slerp(Quats a, Quats b, float t){
             Mathf.Clamp(t,0,1);
             Quats qActual;
             float time = t;
@@ -560,16 +555,13 @@ namespace CustomMath {
             float eulerX = Mathf.Atan2(sinX, cosX) * Mathf.PI / 180.0f;
             float sinY = 2 * (rotation.w * rotation.y - rotation.z * rotation.x);
             float eulerY;
-            if (Mathf.Abs(sinY) >= 1)
-            {
+            if (Mathf.Abs(sinY) >= 1){
                 eulerY = Mathf.PI / 2;
-                if ((eulerY < 0 && sinY > 0) || (eulerY > 0 && sinY < 0))
-                {
+                if ((eulerY < 0 && sinY > 0) || (eulerY > 0 && sinY < 0)){
                     eulerY = -eulerY;
                 }
             }
-            else
-            {
+            else{
                 eulerY = Mathf.Asin(sinY) * Mathf.PI / 180.0f;
             }
             float sinZ = 2 * (rotation.w * rotation.z + rotation.x * rotation.y);
@@ -606,7 +598,7 @@ namespace CustomMath {
             }
         }
         public static bool operator !=(Quats lhs, Quats rhs) {
-            if (lhs.x != rhs.x && lhs.y != rhs.y && lhs.z != rhs.z && lhs.w != rhs.w)
+            if (!(lhs == rhs))
             {
                 return true;
             }
